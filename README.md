@@ -71,3 +71,30 @@ export default defineConfig([
   },
 ])
 ```
+
+# Install instructions
+This dependencies provides instructions on how to install the necessary dependencies for the AEDnow_Dashboard
+
+## 3. Install Dependencies
+Run this code after cloning:
+```bash
+npm install
+```
+This installs:
+- React
+- Vite
+- Material UI
+- React Router
+- TypeScript dependencies
+
+## 4. Start the development server 
+```bash
+npm run dev
+```
+
+You should see something like:
+
+Local: http://localhost:5173/
+
+
+Open that link in your browser.
