@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -46,32 +46,33 @@ export default function Dashboard() {
   const [open, setOpen] = useState(false);
   const [editingAedId, setEditingAedId] = useState<number | null>(null);
 
-  const [aeds, setAeds] = useState<Aed[]>([
-    {
-      id: 1,
-      name: "City Mall AED",
-      indoor: true,
-      available: true,
-      address: "1 Henry Street, Dublin 1",
-      eircode: "D01 F5P2"
-    },
-    {
-      id: 2,
-      name: "Train Station AED",
-      indoor: false,
-      available: false,
-      address: "Connolly Station, Amiens Street, Dublin 1",
-      eircode: "D01 P6V6"
-    },
-    {
-      id: 3,
-      name: "University Sports Hall AED",
-      indoor: true,
-      available: true,
-      address: "Belfield Campus, University College Dublin",
-      eircode: "D04 V1W8"
+  const [aeds, setAeds] = useState<Aed[]>([]);
+  
+  // Fetch AEDs from backend
+useEffect(() => {
+  const fetchAeds = async () => {
+    try {
+      const response = await fetch('https://api.aednow.online/api/aedlocations');
+      const data = await response.json();
+      
+      if (data.success) {
+        const transformedAeds = data.data.map((aed: any) => ({
+          id: aed.id,
+          name: aed.name,
+          indoor: aed.indoor || false,
+          available: true,
+          address: aed.address || 'No address',
+          eircode: ''
+        }));
+        setAeds(transformedAeds);
+      }
+    } catch (error) {
+      console.error('Error fetching AEDs:', error);
     }
-  ]);
+  };
+
+  fetchAeds();
+}, []);
 
   const [formAed, setFormAed] = useState<Omit<Aed, "id">>({
     name: "",
