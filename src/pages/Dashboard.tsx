@@ -39,6 +39,8 @@ type Aed = {
   available: boolean;
   address: string;
   eircode: string;
+  latitude: number;
+  longitude: number;
 };
 
 export default function Dashboard() {
@@ -62,7 +64,9 @@ useEffect(() => {
           indoor: aed.indoor || false,
           available: true,
           address: aed.address || 'No address',
-          eircode: ''
+          eircode: '',
+          latitude: aed.latitude,
+          longitude: aed.longitude
         }));
         setAeds(transformedAeds);
       }
@@ -79,7 +83,9 @@ useEffect(() => {
     indoor: false,
     available: true,
     address: "",
-    eircode: ""
+    eircode: "",
+    latitude: 0,
+    longitude: 0
   });
 
  
@@ -138,7 +144,9 @@ useEffect(() => {
       indoor: false,
       available: true,
       address: "",
-      eircode: ""
+      eircode: "",
+      latitude: 0,
+      longitude: 0
     });
   };
 
@@ -149,7 +157,9 @@ useEffect(() => {
       indoor: aed.indoor,
       available: aed.available,
       address: aed.address,
-      eircode: aed.eircode
+      eircode: aed.eircode,
+      latitude: aed.latitude,
+      longitude: aed.longitude
     });
     setOpen(true);
   };
@@ -205,7 +215,9 @@ useEffect(() => {
               indoor: false,
               available: true,
               address: "",
-              eircode: ""
+              eircode: "",
+              latitude: 0,
+              longitude: 0
             });
             setOpen(true);
           }}
@@ -242,6 +254,8 @@ useEffect(() => {
                 </TableCell>
                 <TableCell align="center">{aed.address}</TableCell>
                 <TableCell align="center">{aed.eircode}</TableCell>
+                <TableCell align="center">{aed.latitude}</TableCell>
+                <TableCell align="center">{aed.longitude}</TableCell>
                 <TableCell align="center">
                   <IconButton color="primary" onClick={() => handleEditClick(aed)}>
                     <EditIcon />
@@ -278,7 +292,16 @@ useEffect(() => {
             value={formAed.eircode}
             onChange={e => setFormAed({ ...formAed, eircode: e.target.value })}
           />
-
+          <TextField
+            label="latitude"
+            value={formAed.latitude === 0 ? "text" : "number"}
+            onChange={e => setFormAed({ ...formAed, latitude: parseFloat(e.target.value) })}
+          />
+          <TextField
+            label="longitude"
+            value={formAed.longitude === 0 ? "text" : "number"}
+            onChange={e => setFormAed({ ...formAed, longitude: parseFloat(e.target.value) })}
+          />
           <FormControlLabel
             control={
               <Checkbox
