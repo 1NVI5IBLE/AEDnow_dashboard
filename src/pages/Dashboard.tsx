@@ -293,14 +293,20 @@ useEffect(() => {
             onChange={e => setFormAed({ ...formAed, eircode: e.target.value })}
           />
           <TextField
-            label="latitude"
-            value={formAed.latitude === 0 ? "text" : "number"}
-            onChange={e => setFormAed({ ...formAed, latitude: parseFloat(e.target.value) })}
+            label="Latitude"
+            type="number"
+            value={formAed.latitude}
+            onChange={e =>
+              setFormAed({ ...formAed, latitude: parseFloat(e.target.value) })
+            }
           />
           <TextField
-            label="longitude"
-            value={formAed.longitude === 0 ? "text" : "number"}
-            onChange={e => setFormAed({ ...formAed, longitude: parseFloat(e.target.value) })}
+            label="Longitude"
+            type="number"
+            value={formAed.longitude}
+            onChange={e =>
+              setFormAed({ ...formAed, longitude: parseFloat(e.target.value) })
+            }
           />
           <FormControlLabel
             control={
