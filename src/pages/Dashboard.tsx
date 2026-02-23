@@ -33,7 +33,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 
 type Aed = {
-  id: number;
+  id: string;
   name: string;
   indoor: boolean;
   available: boolean;
@@ -46,7 +46,7 @@ type Aed = {
 export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
-  const [editingAedId, setEditingAedId] = useState<number | null>(null);
+  const [editingAedId, setEditingAedId] = useState<string | null>(null);
 
   const [aeds, setAeds] = useState<Aed[]>([]);
   
@@ -219,7 +219,7 @@ export default function Dashboard() {
   const handleDeleteAed = (id: number) => {
     if (window.confirm("Delete this AED?")) {
 
-      const handleDeleteAed = async (id: number) => {
+      const handleDeleteAed = async (id: string) => {
         if (!window.confirm("Delete this AED?")) return;
       
         try {
