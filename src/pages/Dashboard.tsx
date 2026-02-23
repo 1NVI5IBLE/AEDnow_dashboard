@@ -126,29 +126,76 @@ useEffect(() => {
 
  
 
-  const handleSaveAed = () => {
-    if (editingAedId === null) {
-      setAeds(prev => [...prev, { id: Date.now(), ...formAed }]);
-    } else {
-      setAeds(prev =>
-        prev.map(aed =>
-          aed.id === editingAedId ? { id: editingAedId, ...formAed } : aed
-        )
-      );
-    }
+  // const handleSaveAed = () => {
+  //   if (editingAedId === null) {
+  //     setAeds(prev => [...prev, { id: Date.now(), ...formAed }]);
+  //   } else {
+  //     setAeds(prev =>
+  //       prev.map(aed =>
+  //         aed.id === editingAedId ? { id: editingAedId, ...formAed } : aed
+  //       )
+  //     );
+  //   }
 
-    setOpen(false);
-    setEditingAedId(null);
-    setFormAed({
-      name: "",
-      indoor: false,
-      available: true,
-      address: "",
-      eircode: "",
-      latitude: 0,
-      longitude: 0
-    });
+  //   setOpen(false);
+  //   setEditingAedId(null);
+  //   setFormAed({
+  //     name: "",
+  //     indoor: false,
+  //     available: true,
+  //     address: "",
+  //     eircode: "",
+  //     latitude: 0,
+  //     longitude: 0
+  //   });
+  // };
+
+  const handleSaveAed = async() => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        alert("Not authenticated");
+        return;
+      }
+  
+      const method = editingAedId ? "PUT" : "POST";
+      const url = editingAedId
+        ? `https://api.aednow.online/api/aedlocations/${editingAedId}`
+        : `https://api.aednow.online/api/aedlocations`;
+  
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(formAed)
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        alert(data.message || "Error saving AED");
+        return;
+      }
+  
+      // Re-fetch updated AED list from database
+      await fetchAedsFromServer();
+  
+      setOpen(false);
+      setEditingAedId(null);
+  
+    } catch (error) {
+      console.error("Error saving AED:", error);
+    }
   };
+
+
+
+
+
+
 
   const handleEditClick = (aed: Aed) => {
     setEditingAedId(aed.id);
