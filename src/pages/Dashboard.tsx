@@ -157,7 +157,7 @@ export default function Dashboard() {
 
   const handleSaveAed = async() => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("adminToken");
   
       if (!token) {
         alert("Not authenticated");
@@ -223,7 +223,7 @@ export default function Dashboard() {
         if (!window.confirm("Delete this AED?")) return;
       
         try {
-          const token = localStorage.getItem("token");
+          const token = localStorage.getItem("adminToken");
       
           const response = await fetch(
             `https://api.aednow.online/api/aedlocations/${id}`,
