@@ -33,7 +33,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 
 type Aed = {
-  id: number;
+  id: string;
   name: string;
   indoor: boolean;
   available: boolean;
@@ -46,37 +46,42 @@ type Aed = {
 export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
-  const [editingAedId, setEditingAedId] = useState<number | null>(null);
+  const [editingAedId, setEditingAedId] = useState<string | null>(null);
 
   const [aeds, setAeds] = useState<Aed[]>([]);
   
   // Fetch AEDs from backend
-useEffect(() => {
-  const fetchAeds = async () => {
+  const fetchAedsFromServer = async () => {
     try {
-      const response = await fetch('https://api.aednow.online/api/aedlocations');
+      const response = await fetch(
+        "https://api.aednow.online/api/aedlocations"
+      );
       const data = await response.json();
-      
+  
       if (data.success) {
         const transformedAeds = data.data.map((aed: any) => ({
           id: aed.id,
           name: aed.name,
           indoor: aed.indoor || false,
           available: true,
-          address: aed.address || 'No address',
-          eircode: '',
+          address: aed.address || "No address",
+          eircode: "",
           latitude: aed.latitude,
           longitude: aed.longitude
         }));
+  
         setAeds(transformedAeds);
       }
     } catch (error) {
-      console.error('Error fetching AEDs:', error);
+      console.error("Error fetching AEDs:", error);
     }
   };
 
-  fetchAeds();
-}, []);
+  useEffect(() => {
+    fetchAedsFromServer();
+  }, []);
+
+
 
   const [formAed, setFormAed] = useState<Omit<Aed, "id">>({
     name: "",
@@ -126,29 +131,76 @@ useEffect(() => {
 
  
 
-  const handleSaveAed = () => {
-    if (editingAedId === null) {
-      setAeds(prev => [...prev, { id: Date.now(), ...formAed }]);
-    } else {
-      setAeds(prev =>
-        prev.map(aed =>
-          aed.id === editingAedId ? { id: editingAedId, ...formAed } : aed
-        )
-      );
-    }
+  // const handleSaveAed = () => {
+  //   if (editingAedId === null) {
+  //     setAeds(prev => [...prev, { id: Date.now(), ...formAed }]);
+  //   } else {
+  //     setAeds(prev =>
+  //       prev.map(aed =>
+  //         aed.id === editingAedId ? { id: editingAedId, ...formAed } : aed
+  //       )
+  //     );
+  //   }
 
-    setOpen(false);
-    setEditingAedId(null);
-    setFormAed({
-      name: "",
-      indoor: false,
-      available: true,
-      address: "",
-      eircode: "",
-      latitude: 0,
-      longitude: 0
-    });
+  //   setOpen(false);
+  //   setEditingAedId(null);
+  //   setFormAed({
+  //     name: "",
+  //     indoor: false,
+  //     available: true,
+  //     address: "",
+  //     eircode: "",
+  //     latitude: 0,
+  //     longitude: 0
+  //   });
+  // };
+
+  const handleSaveAed = async() => {
+    try {
+      const token = localStorage.getItem("adminToken");
+  
+      if (!token) {
+        alert("Not authenticated");
+        return;
+      }
+  
+      const method = editingAedId ? "PUT" : "POST";
+      const url = editingAedId
+        ? `https://api.aednow.online/api/aedlocations/${editingAedId}`
+        : `https://api.aednow.online/api/aedlocations`;
+  
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(formAed)
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        alert(data.message || "Error saving AED");
+        return;
+      }
+  
+      // Re-fetch updated AED list from database
+      await fetchAedsFromServer();
+  
+      setOpen(false);
+      setEditingAedId(null);
+  
+    } catch (error) {
+      console.error("Error saving AED:", error);
+    }
   };
+
+
+
+
+
+
 
   const handleEditClick = (aed: Aed) => {
     setEditingAedId(aed.id);
@@ -166,7 +218,35 @@ useEffect(() => {
 
   const handleDeleteAed = (id: number) => {
     if (window.confirm("Delete this AED?")) {
-      setAeds(prev => prev.filter(aed => aed.id !== id));
+
+      const handleDeleteAed = async (id: string) => {
+        if (!window.confirm("Delete this AED?")) return;
+      
+        try {
+          const token = localStorage.getItem("adminToken");
+      
+          const response = await fetch(
+            `https://api.aednow.online/api/aedlocations/${id}`,
+            {
+              method: "DELETE",
+              headers: {
+                "Authorization": `Bearer ${token}`
+              }
+            }
+          );
+      
+          if (!response.ok) {
+            alert("Error deleting AED");
+            return;
+          }
+      
+          await fetchAedsFromServer();
+      
+        } catch (error) {
+          console.error("Delete error:", error);
+        }
+      };
+
     }
   };
 
@@ -293,14 +373,20 @@ useEffect(() => {
             onChange={e => setFormAed({ ...formAed, eircode: e.target.value })}
           />
           <TextField
-            label="latitude"
-            value={formAed.latitude === 0 ? "text" : "number"}
-            onChange={e => setFormAed({ ...formAed, latitude: parseFloat(e.target.value) })}
+            label="Latitude"
+            type="number"
+            value={formAed.latitude}
+            onChange={e =>
+              setFormAed({ ...formAed, latitude: parseFloat(e.target.value) })
+            }
           />
           <TextField
-            label="longitude"
-            value={formAed.longitude === 0 ? "text" : "number"}
-            onChange={e => setFormAed({ ...formAed, longitude: parseFloat(e.target.value) })}
+            label="Longitude"
+            type="number"
+            value={formAed.longitude}
+            onChange={e =>
+              setFormAed({ ...formAed, longitude: parseFloat(e.target.value) })
+            }
           />
           <FormControlLabel
             control={
