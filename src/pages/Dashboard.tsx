@@ -82,7 +82,7 @@ export default function Dashboard() {
   }, []);
 
 
-  
+
   const [formAed, setFormAed] = useState<Omit<Aed, "id">>({
     name: "",
     indoor: false,
@@ -218,7 +218,35 @@ export default function Dashboard() {
 
   const handleDeleteAed = (id: number) => {
     if (window.confirm("Delete this AED?")) {
-      setAeds(prev => prev.filter(aed => aed.id !== id));
+
+      const handleDeleteAed = async (id: number) => {
+        if (!window.confirm("Delete this AED?")) return;
+      
+        try {
+          const token = localStorage.getItem("token");
+      
+          const response = await fetch(
+            `https://api.aednow.online/api/aedlocations/${id}`,
+            {
+              method: "DELETE",
+              headers: {
+                "Authorization": `Bearer ${token}`
+              }
+            }
+          );
+      
+          if (!response.ok) {
+            alert("Error deleting AED");
+            return;
+          }
+      
+          await fetchAedsFromServer();
+      
+        } catch (error) {
+          console.error("Delete error:", error);
+        }
+      };
+
     }
   };
 
